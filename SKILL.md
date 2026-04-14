@@ -99,6 +99,23 @@ Live metrics for a brain. Call with `view` parameter: learning, queries, freshne
 ### read_document
 Fetch specific content from documents stored in the brain's document system.
 
+## Agents, Tools & Skills
+
+### Agents
+First-class cognitive entities with personality, permissions, and tool access. Each agent has an `agent_prompt` (replaces default system instructions), `tool_permissions` (per-MCP-tool toggles), brain assignments with granular scopes, encrypted variables, and custom serverless tools. Create in admin portal → get MCP URL → connect.
+
+### Serverless Tools
+JavaScript functions executing in sandboxed V8 isolates (workerd). Create once in the Tools library, assign to any agent. Agent variables injected as `env` bindings. Built-in `fetch()` for external API calls. Format: `async function(args, env) { ... }`.
+
+### Skills Library
+Behavioral instructions — create once, assign to brains (inherited) and/or agents (explicit). Shape HOW the AI works.
+
+### Variable Inheritance
+Three tiers: Org → Brain → Agent. Each overrides the one above. All encrypted at rest. Set `ANTHROPIC_API_KEY` at org level, override `CAUSEIQ_TOKEN` at agent level.
+
+### MCP Relay
+Connect external MCP servers → relay their tools through Zombie's permissions. Tools namespaced as `{slug}__{toolName}`. Three connector types: Webhook (ingest), API Key (bidirectional), MCP Server (relay).
+
 ## The Zombie Philosophy
 
 Zombies like brains. We keep the adaptive mechanisms of human memory (consolidation, salience, habituation, emotional contagion) while eliminating the bugs (forgetting, interference, source amnesia, false memories). Your AI gets human-like memory quality without human memory limitations.
