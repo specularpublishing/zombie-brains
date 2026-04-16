@@ -234,22 +234,49 @@ Before declaring any build "done", run through these. Each one catches a common 
 7. **MCP relay status?** After adding an MCP connector, verify `mcp_status = connected` before assigning relay tools to agents. A broken connector gives agents broken tools.
 8. **Members vs agent permissions?** Inviting a member to a brain gives them brain access (memories, skills, CK). Agent tool permissions are separate — controlled by the permission set assigned to the agent.
 
+## Variable management — direct vs link
+
+Two mechanisms for setting variables, based on sensitivity:
+
+**For non-sensitive values** (config, preferences, URLs):
+```json
+{"action": "set_variable_direct", "var_name": "COMPANY_NAME", "var_value": "Acme Corp", "var_scope": "org"}
+```
+
+**For credentials** (API keys, tokens, passwords):
+```json
+{"action": "create_variable_link", "var_name": "ANTHROPIC_API_KEY", "var_scope": "org"}
+```
+This generates a single-use browser link. Share it with the user — they open it, paste the key, and it is encrypted immediately. The credential never appears in the conversation. Use `update_variable_link` to change an existing credential.
+
+**To check what is configured:**
+```json
+{"action": "list_variables"}
+```
+Shows names and scopes only — never values.
+
+**How to decide:** if the value is something you would put in a `.env` file but NOT in a commit message, use the link. Everything else use direct.
+
 ## Variable scope quick reference
 
-Variables inherit through four layers. Each layer overrides the one above.
+Variables inherit through six layers. Each layer overrides the one above.
 
 ```
 org (company-wide)
   └─ permission_set (role-level, shared across agents with this role)
        └─ brain (brain-level, shared across agents on this brain)
-            └─ agent (this agent only — highest priority, wins all conflicts)
+            └─ agent (this agent only)
+                 └─ conversation (runtime state — customer email, verification status)
+                      └─ request (ephemeral, per-call context from the developer)
 ```
 
-When creating variables via `new_variables`, the `scope` field is REQUIRED and determines which layer:
+When creating variables via `new_variables`, the `scope` field is REQUIRED:
 - `"org"` → stored on the user, visible to all agents
 - `"permission_set"` → stored on the assigned role (requires `permission_set_id`)
 - `"brain"` → stored on the first assigned brain
 - `"agent"` → stored on the agent itself (most common for API keys)
+
+Conversation and request scopes are set automatically by the managed runtime, not via manage actions.
 
 ## The philosophy in one line
 
