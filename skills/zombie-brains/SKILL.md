@@ -174,6 +174,16 @@ Admin API for reviewing conversations:
 - `GET /v1/conversations?agent_id=&channel=&search=` — search conversations
 - `GET /v1/conversations/:id/messages` — full message history
 
+## Automatic memory evaluation (managed runtime only)
+
+The `/chat` managed runtime automatically evaluates every exchange after the LLM responds and stores memory-worthy content server-side. The LLM does NOT need to call `add_memory` — the infrastructure catches it.
+
+Five signal types detected: **decisions** ("decided", "going with"), **preferences** ("prefer", "hate"), **constraints** ("can't", "must not"), **corrections** ("actually", "wrong"), **insights** ("realized", "turns out").
+
+Conservative heuristic — skips short exchanges, simple Q&A, and turns with no signals. Logged as `add_memory_auto` in conversation history for traceability.
+
+This is the server-side equivalent of the hook's HONESTLY evaluation. For the MCP path (Claude Code plugin), the hook handles memory evaluation. For the `/chat` path (managed runtime), the server handles it. Both paths produce memories.
+
 ## Bundled create — the one-call pattern
 
 Use `manage(create_agent, ...)` with inline params to build everything atomically:
